@@ -14,8 +14,4 @@ export class Person {
   get id() {
     return this._id;
   }
-
-  set id(arg) {
-    this._id = arg;
-  }
 }
