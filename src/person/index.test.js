@@ -8,8 +8,7 @@ describe('Person', () => {
   });
 
   it('should allow to configure an id', () => {
-    const person = new Person();
-    person.id = 123;
+    const person = new Person(123);
     expect(person.id).toEqual(123);
   });
 });

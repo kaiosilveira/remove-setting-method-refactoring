@@ -1,6 +1,6 @@
 export class Person {
   constructor(id) {
-    this.id = id;
+    this._id = id;
   }
 
   get name() {
