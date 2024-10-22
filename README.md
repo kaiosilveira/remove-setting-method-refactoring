@@ -1,45 +1,10 @@
 [![Continuous Integration](https://github.com/kaiosilveira/remove-setting-method-refactoring/actions/workflows/ci.yml/badge.svg)](https://github.com/kaiosilveira/remove-setting-method-refactoring/actions/workflows/ci.yml)
 
-# Refactoring catalog repository template
-
-This is a quick template to help me get a new refactoring repo going.
-
-## Things to do after creating a repo off of this template
-
-1. Run `GITHUB_TOKEN=$(gh auth token) yarn tools:cli prepare-repository -r <repo_name>`. It will:
-
-- Update the `README.md` file with the actual repository name, CI badge, and commit history link
-- Update `package.json` with the repository's name and remote URL
-- Update the repo's homepage on GitHub with:
-  - A description
-  - A website link to https://github.com/kaiosilveira/refactoring
-  - The following labels: javascript, refactoring, remove-setting-method-refactoring
-
-2. Replace the lorem ipsum text sections below with actual text
-
-## Useful commands
-
-- Generate markdown containing a diff with patch information based on a range of commits:
-
-```bash
-yarn tools:cli generate-diff -f <first_commit_sha> -l <last_commit_sha>
-```
-
-- To generate the commit history table for the last section, including the correct links:
-
-```bash
-yarn tools:cli generate-cmt-table -r remove-setting-method-refactoring
-```
-
----
-
 ℹ️ _This repository is part of my Refactoring catalog based on Fowler's book with the same title. Please see [kaiosilveira/refactoring](https://github.com/kaiosilveira/refactoring) for more details._
 
 ---
 
 # Remove Setting Method
-
-**Formerly: Old name**
 
 <table>
 <thead>
@@ -51,7 +16,15 @@ yarn tools:cli generate-cmt-table -r remove-setting-method-refactoring
 <td>
 
 ```javascript
-result = initial.code;
+class Person {
+  get name() {
+    /* ... */
+  }
+
+  set name(aString) {
+    /* ... */
+  }
+}
 ```
 
 </td>
@@ -59,10 +32,10 @@ result = initial.code;
 <td>
 
 ```javascript
-result = newCode();
-
-function newCode() {
-  return 'new code';
+class Person {
+  get name() {
+    /* ... */
+  }
 }
 ```
 
@@ -71,46 +44,92 @@ function newCode() {
 </tbody>
 </table>
 
-**Inverse of: [Another refactoring](https://github.com/kaiosilveira/refactoring)**
-
-**Refactoring introduction and motivation** dolore sunt deserunt proident enim excepteur et cillum duis velit dolor. Aute proident laborum officia velit culpa enim occaecat officia sunt aute labore id anim minim. Eu minim esse eiusmod enim nulla Lorem. Enim velit in minim anim anim ad duis aute ipsum voluptate do nulla. Ad tempor sint dolore et ullamco aute nulla irure sunt commodo nulla aliquip.
+Making objects immutable is a practical way of avoiding overhead (in the form of tracking changes throughout a codebase) and unintended side effects. This refactoring helps with just that.
 
 ## Working example
 
-**Working example general explanation** proident reprehenderit mollit non voluptate ea aliquip ad ipsum anim veniam non nostrud. Cupidatat labore occaecat labore veniam incididunt pariatur elit officia. Aute nisi in nulla non dolor ullamco ut dolore do irure sit nulla incididunt enim. Cupidatat aliquip minim culpa enim. Fugiat occaecat qui nostrud nostrud eu exercitation Lorem pariatur fugiat ea consectetur pariatur irure. Officia dolore veniam duis duis eu eiusmod cupidatat laboris duis ad proident adipisicing. Minim veniam consectetur ut deserunt fugiat id incididunt reprehenderit.
+Our working example is a program that contains a `Person` class, which contains getters and setters for `name` and `id`. The goal here is to make id immutable after initialization. To do so, we need to remove its setter. The code looks like this:
+
+```javascript
+export class Person {
+  get name() {
+    return this._name;
+  }
+
+  set name(arg) {
+    this._name = arg;
+  }
+
+  get id() {
+    return this._id;
+  }
+
+  set id(arg) {
+    this._id = arg;
+  }
+}
+```
 
 ### Test suite
 
-Occaecat et incididunt aliquip ex id dolore. Et excepteur et ea aute culpa fugiat consectetur veniam aliqua. Adipisicing amet reprehenderit elit qui.
+The test suite, as the rest of this example, is quite simple and covers the basic behavior of the `Person` class:
 
 ```javascript
-describe('functionBeingRefactored', () => {
-  it('should work', () => {
-    expect(0).toEqual(1);
+describe('Person', () => {
+  it('should allow to configure a name', () => {
+    const person = new Person();
+    person.name = 'John Doe';
+    expect(person.name).toEqual('John Doe');
+  });
+
+  it('should allow to configure an id', () => {
+    const person = new Person();
+    person.id = 123;
+    expect(person.id).toEqual(123);
   });
 });
 ```
 
-Magna ut tempor et ut elit culpa id minim Lorem aliqua laboris aliqua dolor. Irure mollit ad in et enim consequat cillum voluptate et amet esse. Fugiat incididunt ea nulla cupidatat magna enim adipisicing consequat aliquip commodo elit et. Mollit aute irure consequat sunt. Dolor consequat elit voluptate aute duis qui eu do veniam laborum elit quis.
+With that in place, we can proceed.
 
 ### Steps
 
-**Step 1 description** mollit eu nulla mollit irure sint proident sint ipsum deserunt ad consectetur laborum incididunt aliqua. Officia occaecat deserunt in aute veniam sunt ad fugiat culpa sunt velit nulla. Pariatur anim sit minim sit duis mollit.
+We start by introducing a construtor for `Person`, it takes an `id` as argument, and we assign it to our internal `_id` variable, via its setter:
 
 ```diff
-diff --git a/src/price-order/index.js b/src/price-order/index.js
-@@ -3,6 +3,11 @@
--module.exports = old;
-+module.exports = new;
+diff --git Person...
++  constructor(id) {
++    this.id = id;
++  }
++
 ```
 
-**Step n description** mollit eu nulla mollit irure sint proident sint ipsum deserunt ad consectetur laborum incididunt aliqua. Officia occaecat deserunt in aute veniam sunt ad fugiat culpa sunt velit nulla. Pariatur anim sit minim sit duis mollit.
+We, then, update the creation script to provide a person id via the constructor:
 
 ```diff
-diff --git a/src/price-order/index.js b/src/price-order/index.js
-@@ -3,6 +3,11 @@
--module.exports = old;
-+module.exports = new;
+diff --git caller...
+-const kaio = new Person();
+-kaio.id = 1;
++const kaio = new Person(1);
+```
+
+And then we inline the setting method for `id` at `Person`'s constructor, effectively making the setter useless:
+
+```diff
+diff --git Person...
+   constructor(id) {
+-    this.id = id;
++    this._id = id;
+   }
+```
+
+We can then safely [remove](https://github.com/kaiosilveira/remove-dead-code-refactoring) the `id` setter altogether:
+
+```diff
+diff --git Person...
+-  set id(arg) {
+-    this._id = arg;
+-  }
 ```
 
 And that's it!
@@ -119,10 +138,11 @@ And that's it!
 
 Below there's the commit history for the steps detailed above.
 
-| Commit SHA                                                                  | Message                  |
-| --------------------------------------------------------------------------- | ------------------------ |
-| [cmt-sha-1](https://github.com/kaiosilveira/remove-setting-method-refactoring/commit-SHA-1) | description of commit #1 |
-| [cmt-sha-2](https://github.com/kaiosilveira/remove-setting-method-refactoring/commit-SHA-2) | description of commit #2 |
-| [cmt-sha-n](https://github.com/kaiosilveira/remove-setting-method-refactoring/commit-SHA-n) | description of commit #n |
+| Commit SHA                                                                                                                   | Message                                                     |
+| ---------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| [92b8007](https://github.com/kaiosilveira/remove-setting-method-refactoring/commit/92b80073256e8efeb364755ca0643569e35292d4) | introduce constructor for `Person`                          |
+| [2051a20](https://github.com/kaiosilveira/remove-setting-method-refactoring/commit/2051a209e7fb98e5dbcdd3a8031f8c1c51d9fa40) | update creation script to provide person id via constructor |
+| [d541695](https://github.com/kaiosilveira/remove-setting-method-refactoring/commit/d541695fca212f5175d56a7997dbeca9f15db35f) | inline setting method for `id` at `Person`'s constructor    |
+| [b9c27b9](https://github.com/kaiosilveira/remove-setting-method-refactoring/commit/b9c27b9889f82daf92d15f256ce7172fccf43fc6) | remove `id` setter                                          |
 
 For the full commit history for this project, check the [Commit History tab](https://github.com/kaiosilveira/remove-setting-method-refactoring/commits/main).
