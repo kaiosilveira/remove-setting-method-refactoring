@@ -1,5 +1,4 @@
 import { Person } from './person';
 
-const kaio = new Person();
-kaio.id = 1;
+const kaio = new Person(1);
 kaio.name = 'Kaio';
